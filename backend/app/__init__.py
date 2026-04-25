@@ -34,7 +34,26 @@ def create_app():
     jwt.init_app(app)
     CORS(app)
 
-    # Register blueprints FIRST (so they take priority)
+    # IMPORTANT: Register frontend routes FIRST (before blueprints)
+    # This ensures static files and React routes are served before API routes
+    @app.route('/')
+    def serve_index():
+        """Serve index.html"""
+        return send_from_directory(frontend_dist, 'index.html')
+
+    @app.route('/<path:path>')
+    def serve_frontend(path):
+        """Serve static files or fallback to index.html for React Router"""
+        file_path = os.path.join(frontend_dist, path)
+
+        # Serve static file if it exists
+        if os.path.isfile(file_path):
+            return send_from_directory(frontend_dist, path)
+
+        # Otherwise serve index.html (React Router will handle it)
+        return send_from_directory(frontend_dist, 'index.html')
+
+    # Register blueprints AFTER frontend routes
     from app.routes import register_blueprints
     register_blueprints(app)
 
