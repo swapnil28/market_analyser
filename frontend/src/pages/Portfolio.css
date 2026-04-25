@@ -1,0 +1,60 @@
+.portfolio {
+  padding: 20px 0;
+}
+
+.portfolio h1 {
+  margin-bottom: 30px;
+}
+
+.portfolios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.portfolio-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.portfolio-card h3 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.portfolio-card p {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.portfolio-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.portfolio-stats > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.portfolio-stats .label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.portfolio-stats .value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
