@@ -79,8 +79,18 @@ def create_app():
             return send_from_directory(frontend_dist, 'index.html')
         return jsonify({'error': 'Not found'}), 404
 
-    # Create tables
+    # Create tables and seed test user
     with app.app_context():
         db.create_all()
+
+        # Create test user if it doesn't exist
+        from app.models.user import User
+        test_user = User.query.filter_by(email='test@example.com').first()
+        if not test_user:
+            test_user = User(email='test@example.com', first_name='Test', last_name='User')
+            test_user.set_password('password123')
+            db.session.add(test_user)
+            db.session.commit()
+            print("[SEED] Created test user: test@example.com / password123")
 
     return app
