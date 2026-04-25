@@ -41,7 +41,7 @@ function App() {
   }
 
   return (
-    <Router>
+    <Router basename="/market_analyser">
       {user && <NavBar user={user} onLogout={handleLogout} />}
       <Routes>
         <Route path="/login" element={<Login onLoginSuccess={(userData) => setUser(userData)} />} />
