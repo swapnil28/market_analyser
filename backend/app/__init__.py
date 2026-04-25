@@ -39,18 +39,31 @@ def create_app():
     @app.route('/')
     def serve_index():
         """Serve index.html"""
-        return send_from_directory(frontend_dist, 'index.html')
+        print(f"[ROUTE /] frontend_dist={frontend_dist}")
+        print(f"[ROUTE /] index_path={index_path}")
+        print(f"[ROUTE /] index exists? {os.path.exists(index_path)}")
+        try:
+            response = send_from_directory(frontend_dist, 'index.html')
+            print(f"[ROUTE /] Successfully serving index.html")
+            return response
+        except Exception as e:
+            print(f"[ROUTE /] ERROR: {e}")
+            return str(e), 500
 
     @app.route('/<path:path>')
     def serve_frontend(path):
         """Serve static files or fallback to index.html for React Router"""
+        print(f"[ROUTE /<path>] path={path}")
         file_path = os.path.join(frontend_dist, path)
+        print(f"[ROUTE /<path>] file_path={file_path}, exists={os.path.isfile(file_path)}")
 
         # Serve static file if it exists
         if os.path.isfile(file_path):
+            print(f"[ROUTE /<path>] Serving static file: {path}")
             return send_from_directory(frontend_dist, path)
 
         # Otherwise serve index.html (React Router will handle it)
+        print(f"[ROUTE /<path>] Serving index.html fallback")
         return send_from_directory(frontend_dist, 'index.html')
 
     # Register blueprints AFTER frontend routes
