@@ -38,41 +38,14 @@ def create_app():
     from app.routes import register_blueprints
     register_blueprints(app)
 
-    # DEBUG: Log paths on startup
-    print(f"=== STARTUP DEBUG ===")
-    print(f"frontend_dist = {frontend_dist}")
-    print(f"index_path = {index_path}")
-    print(f"frontend_dist exists? {os.path.exists(frontend_dist)}")
-    print(f"index_path exists? {os.path.exists(index_path)}")
-    if os.path.exists(frontend_dist):
-        print(f"frontend_dist contents: {os.listdir(frontend_dist)}")
-    print(f"=== END DEBUG ===\n")
 
-    # Serve React frontend
-    @app.route('/', defaults={'path': ''})
-    @app.route('/<path:path>')
-    def serve(path):
-        """Serve frontend files or index.html for React Router"""
-        print(f"[SERVE] path={path}, frontend_dist={frontend_dist}")
-
-        # For root path or no extension, serve index.html
-        if not path or not os.path.splitext(path)[1]:
-            print(f"[SERVE] Serving index.html for root/no-extension path")
-            try:
-                return send_from_directory(frontend_dist, 'index.html')
-            except Exception as e:
-                print(f"[SERVE] Error serving index.html: {e}")
-                return jsonify({'error': str(e)}), 500
-
-        # Try to serve the file
-        file_path = os.path.join(frontend_dist, path)
-        if os.path.isfile(file_path):
-            print(f"[SERVE] Serving file: {path}")
-            return send_from_directory(frontend_dist, path)
-
-        # If file doesn't exist, serve index.html (for React Router)
-        print(f"[SERVE] File not found, serving index.html for React Router")
-        return send_from_directory(frontend_dist, 'index.html')
+    # Error handler for 404 - serve index.html for React Router
+    @app.errorhandler(404)
+    def not_found(error):
+        """Serve index.html for all 404s (React Router handling)"""
+        if os.path.exists(index_path):
+            return send_from_directory(frontend_dist, 'index.html')
+        return jsonify({'error': 'Not found'}), 404
 
     # Create tables
     with app.app_context():
