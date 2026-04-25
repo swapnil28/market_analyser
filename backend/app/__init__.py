@@ -24,7 +24,7 @@ def create_app():
     frontend_dist = os.path.join(root_dir, 'frontend', 'dist')
     index_path = os.path.join(frontend_dist, 'index.html')
 
-    app = Flask(__name__, static_folder=frontend_dist, static_url_path='')
+    app = Flask(__name__)
 
     # Config
     app.config.from_object('app.config.Config')
@@ -41,23 +41,26 @@ def create_app():
     # Serve React frontend (catch-all, must be LAST)
     @app.route('/')
     def index():
-        if os.path.exists(index_path):
+        try:
             return send_from_directory(frontend_dist, 'index.html')
-        return jsonify({'error': 'Frontend not built'}), 404
+        except:
+            return jsonify({'error': 'Frontend not found', 'path': frontend_dist}), 404
 
     @app.route('/<path:path>')
     def serve_static(path):
-        # Skip API routes (they're handled by blueprints)
-        if path.startswith('api/') or path.startswith('health') or path.startswith('auth') or path.startswith('stocks'):
-            return jsonify({'error': 'Not found'}), 404
-        # Serve static files from dist
-        full_path = os.path.join(frontend_dist, path)
-        if os.path.exists(full_path) and os.path.isfile(full_path):
-            return send_from_directory(frontend_dist, path)
-        # Return index.html for all other routes (React Router)
-        if os.path.exists(index_path):
+        # Try to serve as static file first
+        try:
+            full_path = os.path.join(frontend_dist, path)
+            if os.path.isfile(full_path):
+                return send_from_directory(frontend_dist, path)
+        except:
+            pass
+
+        # Default to index.html for React Router
+        try:
             return send_from_directory(frontend_dist, 'index.html')
-        return jsonify({'error': 'Not found'}), 404
+        except:
+            return jsonify({'error': 'Not found'}), 404
 
     # Create tables
     with app.app_context():
