@@ -53,16 +53,25 @@ def create_app():
     @app.route('/<path:path>')
     def serve(path):
         """Serve frontend files or index.html for React Router"""
+        print(f"[SERVE] path={path}, frontend_dist={frontend_dist}")
+
         # For root path or no extension, serve index.html
         if not path or not os.path.splitext(path)[1]:
-            return send_from_directory(frontend_dist, 'index.html')
+            print(f"[SERVE] Serving index.html for root/no-extension path")
+            try:
+                return send_from_directory(frontend_dist, 'index.html')
+            except Exception as e:
+                print(f"[SERVE] Error serving index.html: {e}")
+                return jsonify({'error': str(e)}), 500
 
         # Try to serve the file
         file_path = os.path.join(frontend_dist, path)
         if os.path.isfile(file_path):
+            print(f"[SERVE] Serving file: {path}")
             return send_from_directory(frontend_dist, path)
 
         # If file doesn't exist, serve index.html (for React Router)
+        print(f"[SERVE] File not found, serving index.html for React Router")
         return send_from_directory(frontend_dist, 'index.html')
 
     # Create tables
