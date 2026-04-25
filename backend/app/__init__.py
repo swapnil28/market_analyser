@@ -38,13 +38,23 @@ def create_app():
     from app.routes import register_blueprints
     register_blueprints(app)
 
+    # DEBUG: Log paths on startup
+    print(f"=== STARTUP DEBUG ===")
+    print(f"frontend_dist = {frontend_dist}")
+    print(f"index_path = {index_path}")
+    print(f"frontend_dist exists? {os.path.exists(frontend_dist)}")
+    print(f"index_path exists? {os.path.exists(index_path)}")
+    if os.path.exists(frontend_dist):
+        print(f"frontend_dist contents: {os.listdir(frontend_dist)}")
+    print(f"=== END DEBUG ===\n")
+
     # Serve React frontend (catch-all, must be LAST)
     @app.route('/')
     def index():
         try:
             return send_from_directory(frontend_dist, 'index.html')
-        except:
-            return jsonify({'error': 'Frontend not found', 'path': frontend_dist}), 404
+        except Exception as e:
+            return jsonify({'error': f'Frontend error: {str(e)}', 'path': frontend_dist, 'exists': os.path.exists(frontend_dist)}), 404
 
     @app.route('/<path:path>')
     def serve_static(path):
