@@ -14,8 +14,14 @@ jwt = JWTManager()
 def create_app():
     """Application factory."""
     # Get absolute paths
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    frontend_dist = os.path.join(base_dir, '..', 'frontend', 'dist')
+    # __file__ = /path/to/backend/app/__init__.py
+    # dirname(__file__) = /path/to/backend/app
+    # dirname(dirname(__file__)) = /path/to/backend
+    # We need /path/to/frontend/dist, so go up one more level from backend
+    app_dir = os.path.dirname(os.path.abspath(__file__))  # backend/app
+    backend_dir = os.path.dirname(app_dir)  # backend
+    root_dir = os.path.dirname(backend_dir)  # root (project root)
+    frontend_dist = os.path.join(root_dir, 'frontend', 'dist')
     index_path = os.path.join(frontend_dist, 'index.html')
 
     app = Flask(__name__, static_folder=frontend_dist, static_url_path='')
