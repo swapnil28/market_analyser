@@ -48,29 +48,22 @@ def create_app():
         print(f"frontend_dist contents: {os.listdir(frontend_dist)}")
     print(f"=== END DEBUG ===\n")
 
-    # Serve React frontend (catch-all, must be LAST)
-    @app.route('/')
-    def index():
-        try:
-            return send_from_directory(frontend_dist, 'index.html')
-        except Exception as e:
-            return jsonify({'error': f'Frontend error: {str(e)}', 'path': frontend_dist, 'exists': os.path.exists(frontend_dist)}), 404
-
+    # Serve React frontend
+    @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
-    def serve_static(path):
-        # Try to serve as static file first
-        try:
-            full_path = os.path.join(frontend_dist, path)
-            if os.path.isfile(full_path):
-                return send_from_directory(frontend_dist, path)
-        except:
-            pass
-
-        # Default to index.html for React Router
-        try:
+    def serve(path):
+        """Serve frontend files or index.html for React Router"""
+        # For root path or no extension, serve index.html
+        if not path or not os.path.splitext(path)[1]:
             return send_from_directory(frontend_dist, 'index.html')
-        except:
-            return jsonify({'error': 'Not found'}), 404
+
+        # Try to serve the file
+        file_path = os.path.join(frontend_dist, path)
+        if os.path.isfile(file_path):
+            return send_from_directory(frontend_dist, path)
+
+        # If file doesn't exist, serve index.html (for React Router)
+        return send_from_directory(frontend_dist, 'index.html')
 
     # Create tables
     with app.app_context():
