@@ -28,11 +28,11 @@ def create_app():
     jwt.init_app(app)
     CORS(app)
 
-    # Register blueprints
+    # Register blueprints FIRST (so they take priority)
     from app.routes import register_blueprints
     register_blueprints(app)
 
-    # Serve React frontend
+    # Serve React frontend (catch-all, must be LAST)
     @app.route('/')
     def index():
         if os.path.exists(index_path):
@@ -41,6 +41,9 @@ def create_app():
 
     @app.route('/<path:path>')
     def serve_static(path):
+        # Skip API routes (they're handled by blueprints)
+        if path.startswith('api/') or path.startswith('health') or path.startswith('auth') or path.startswith('stocks'):
+            return jsonify({'error': 'Not found'}), 404
         # Serve static files from dist
         full_path = os.path.join(frontend_dist, path)
         if os.path.exists(full_path) and os.path.isfile(full_path):
