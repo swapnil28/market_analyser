@@ -68,16 +68,23 @@ def create_app():
 
     # Create tables and seed test user
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
 
-        # Create test user if it doesn't exist
-        from app.models.user import User
-        test_user = User.query.filter_by(email='test@example.com').first()
-        if not test_user:
-            test_user = User(email='test@example.com', first_name='Test', last_name='User')
-            test_user.set_password('password123')
-            db.session.add(test_user)
-            db.session.commit()
-            print("[SEED] Created test user: test@example.com / password123")
+            # Create test user if it doesn't exist
+            from app.models.user import User
+            try:
+                test_user = User.query.filter_by(email='test@example.com').first()
+                if not test_user:
+                    test_user = User(email='test@example.com', first_name='Test', last_name='User')
+                    test_user.set_password('password123')
+                    db.session.add(test_user)
+                    db.session.commit()
+                    print("[SEED] Created test user: test@example.com / password123")
+            except Exception as e:
+                print(f"[SEED] Warning: {e}")
+                db.session.rollback()
+        except Exception as e:
+            print(f"[APP] Database error: {e}")
 
     return app
