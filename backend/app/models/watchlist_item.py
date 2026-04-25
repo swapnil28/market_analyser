@@ -1,7 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
+from app import db
 from datetime import datetime
 
-db = SQLAlchemy()
+
 
 
 class WatchlistItem(db.Model):
